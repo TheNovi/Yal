@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------- Yal -------------------------------------
+model Yal {
+  id        Int      @id @default(autoincrement())
+  offset    Int
+  Goal      Goal[]
+  Month     Month[]
+  createdAt DateTime @default(now())
+}
+
+model Goal {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     Int
+  Yal       Yal      @relation(fields: [yalId], references: [id], onDelete: Cascade)
+  yalId     Int
+  createdAt DateTime @default(now())
+}
+
+model Month {
+  id        Int      @id @default(autoincrement())
+  init      Int
+  year      Int
+  month     Int
+  Trans     Trans[]
+  Block     Block    @relation(fields: [blockId], references: [id])
+  blockId   Int
+  Yal       Yal      @relation(fields: [yalId], references: [id], onDelete: Cascade)
+  yalId     Int
+  createdAt DateTime @default(now())
+
+  // @@unique(fields: [yalId, year, month], name: "year_month")
+  @@index([year(sort: Desc), month(sort: Desc)])
+}
+
+model Trans {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     Int
+  ignore    Boolean  @default(false)
+  Month     Month    @relation(fields: [monthId], references: [id], onDelete: Cascade)
+  monthId   Int
+  createdAt DateTime @default(now())
+}
+
+model Block {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     Int
+  Month     Month[]
+  createdAt DateTime @default(now())
+}
